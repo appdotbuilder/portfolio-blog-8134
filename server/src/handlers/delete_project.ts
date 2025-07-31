@@ -1,7 +1,26 @@
 
+import { db } from '../db';
+import { projectsTable } from '../db/schema';
+import { eq } from 'drizzle-orm';
+
 export async function deleteProject(id: number): Promise<void> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is deleting a project by ID from the database.
-    // Should throw an error if project with given ID doesn't exist.
-    return Promise.resolve();
+  try {
+    // Check if project exists first
+    const existingProject = await db.select()
+      .from(projectsTable)
+      .where(eq(projectsTable.id, id))
+      .execute();
+
+    if (existingProject.length === 0) {
+      throw new Error(`Project with ID ${id} not found`);
+    }
+
+    // Delete the project
+    await db.delete(projectsTable)
+      .where(eq(projectsTable.id, id))
+      .execute();
+  } catch (error) {
+    console.error('Project deletion failed:', error);
+    throw error;
+  }
 }

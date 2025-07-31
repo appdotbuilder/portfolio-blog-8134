@@ -1,7 +1,22 @@
 
-export async function deleteBlogPost(id: number): Promise<void> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is deleting a blog post by ID from the database.
-    // Should throw an error if post with given ID doesn't exist.
-    return Promise.resolve();
-}
+import { db } from '../db';
+import { blogPostsTable } from '../db/schema';
+import { eq } from 'drizzle-orm';
+
+export const deleteBlogPost = async (id: number): Promise<void> => {
+  try {
+    // Delete the blog post by ID
+    const result = await db.delete(blogPostsTable)
+      .where(eq(blogPostsTable.id, id))
+      .returning()
+      .execute();
+
+    // Check if any rows were deleted
+    if (result.length === 0) {
+      throw new Error(`Blog post with ID ${id} not found`);
+    }
+  } catch (error) {
+    console.error('Blog post deletion failed:', error);
+    throw error;
+  }
+};
